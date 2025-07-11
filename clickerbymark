@@ -1,0 +1,131 @@
+-- Ultimate Clicker Simulator UI (Executor Edition) by markthesecond 💥
+
+local player = game.Players.LocalPlayer
+local gui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
+gui.Name = "ClickerGUI"
+gui.ResetOnSpawn = false
+gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+
+-- UIStroke utility
+local function addStroke(inst, thickness, color)
+	local stroke = Instance.new("UIStroke", inst)
+	stroke.Thickness = thickness
+	stroke.Color = color
+end
+
+-- Splash Screen
+local splash = Instance.new("TextLabel", gui)
+splash.Size = UDim2.new(1, 0, 1, 0)
+splash.Text = "✨ By markthesecond ✨"
+splash.TextColor3 = Color3.fromRGB(255, 255, 255)
+splash.BackgroundTransparency = 1
+splash.TextScaled = true
+splash.Font = Enum.Font.FredokaOne
+splash.ZIndex = 99
+
+-- Fade effect
+splash.TextTransparency = 1
+task.spawn(function()
+	for i = 1, 20 do
+		splash.TextTransparency = 1 - i * 0.05
+		task.wait(0.05)
+	end
+	task.wait(1.5)
+	for i = 1, 20 do
+		splash.TextTransparency = i * 0.05
+		task.wait(0.05)
+	end
+	splash.Visible = false
+end)
+
+-- Corner styling
+local function roundify(obj, radius)
+	local corner = Instance.new("UICorner")
+	corner.CornerRadius = UDim.new(0, radius)
+	corner.Parent = obj
+end
+
+-- Clicks Label
+local clicksLabel = Instance.new("TextLabel", gui)
+clicksLabel.Position = UDim2.new(0.5, -110, 0.15, 0)
+clicksLabel.Size = UDim2.new(0, 220, 0, 45)
+clicksLabel.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+clicksLabel.TextColor3 = Color3.new(1, 1, 1)
+clicksLabel.TextScaled = true
+clicksLabel.Font = Enum.Font.GothamBlack
+clicksLabel.Text = "Clicks: 0"
+roundify(clicksLabel, 12)
+addStroke(clicksLabel, 2, Color3.fromRGB(0, 255, 255))
+
+-- Level Label
+local levelLabel = Instance.new("TextLabel", gui)
+levelLabel.Position = UDim2.new(0.5, -110, 0.23, 0)
+levelLabel.Size = UDim2.new(0, 220, 0, 45)
+levelLabel.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+levelLabel.TextColor3 = Color3.new(1, 1, 1)
+levelLabel.TextScaled = true
+levelLabel.Font = Enum.Font.GothamBold
+levelLabel.Text = "Level: 1"
+roundify(levelLabel, 12)
+addStroke(levelLabel, 2, Color3.fromRGB(255, 170, 0))
+
+-- Progress Bar Background
+local barBg = Instance.new("Frame", gui)
+barBg.Position = UDim2.new(0.5, -110, 0.32, 0)
+barBg.Size = UDim2.new(0, 220, 0, 20)
+barBg.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+roundify(barBg, 10)
+
+-- Progress Fill
+local barFill = Instance.new("Frame", barBg)
+barFill.Size = UDim2.new(0, 0, 1, 0)
+barFill.BackgroundColor3 = Color3.fromRGB(0, 255, 140)
+roundify(barFill, 10)
+
+-- Click Button
+local button = Instance.new("TextButton", gui)
+button.Position = UDim2.new(0.5, -120, 0.65, 0)
+button.Size = UDim2.new(0, 240, 0, 70)
+button.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
+button.TextColor3 = Color3.new(1, 1, 1)
+button.Text = "🔥 Click Me 🔥"
+button.Font = Enum.Font.GothamBlack
+button.TextScaled = true
+roundify(button, 16)
+addStroke(button, 3, Color3.fromRGB(255, 255, 255))
+
+-- Neon glow (extra)
+local glow = Instance.new("UIGradient", button)
+glow.Color = ColorSequence.new{
+	ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 255, 255)),
+	ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 0, 255))
+}
+glow.Rotation = 45
+
+-- Core Variables
+local clicks = 0
+local level = 1
+local clicksToLevel = 10
+
+local function updateUI()
+	clicksLabel.Text = "Clicks: " .. clicks
+	levelLabel.Text = "Level: " .. level
+	local progress = math.clamp(clicks / clicksToLevel, 0, 1)
+	barFill:TweenSize(UDim2.new(progress, 0, 1, 0), "Out", "Quad", 0.2, true)
+end
+
+local function checkLevel()
+	while clicks >= clicksToLevel do
+		clicks -= clicksToLevel
+		level += 1
+		clicksToLevel = math.floor(clicksToLevel * 1.5)
+	end
+end
+
+button.MouseButton1Click:Connect(function()
+	clicks += 1
+	checkLevel()
+	updateUI()
+end)
+
+updateUI()
